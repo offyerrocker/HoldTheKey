@@ -8,7 +8,7 @@ Compatible with both [BLT](https://github.com/JamesWilko/Payday-2-BLT-Lua) and [
 
 **HoldTheKey:Add_Keybind(keybind_id)**
 
-  Use this function to store keybinds, so that you may add them later. I would advise putting this inside a hook to `MenuManagerInitialize.`
+  Use this function to store and register keybinds, so that you may add them later with *HoldTheKey:Get_Mod_Keybind()*. I would advise putting this inside a hook to `MenuManagerInitialize.`
 
   *Arguments:* `keybind_id` as defined in your mod's menu.
 
@@ -57,15 +57,24 @@ Compatible with both [BLT](https://github.com/JamesWilko/Payday-2-BLT-Lua) and [
 
 **HoldTheKey:Keybind_Held(keybind_id)**
 
+  Very useful. Use this to check if your key is being held. Can be used in once-per-frame checks.
+
   *Arguments:* `keybind_id` as defined in your mod's menu.
 
   *Returns:* Boolean- whether or not the key bound to that keybind is being held.
 
   *Example:* 
 
-  `>HoldTheKey:Keybind_Held("keybindid_taclean_left")
-  =>true`
-
+  `Hooks:PostHook(PlayerManager,"update","PlayerManagerUpdate_TacticalLean",function(self,t,dt)`
+  
+  `    if HoldTheKey:Keybind_Held("keybindid_taclean_left") then`
+  
+  `        --do stuff`
+  
+  `    end`
+  
+  `    end)`
+  
 ---
 
 **HoldTheKey:Key_Held(key)**

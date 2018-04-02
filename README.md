@@ -50,8 +50,9 @@ Compatible with both [BLT](https://github.com/JamesWilko/Payday-2-BLT-Lua) and [
 
   *Example:*
 
-  `> HoldTheKey:Get_Mod_Keybind("keybindid_taclean_left")
-  => "q"`
+  `> HoldTheKey:Get_Mod_Keybind("keybindid_taclean_left")`
+  
+  `=> "q"`
 
 ---
 
@@ -85,8 +86,9 @@ Compatible with both [BLT](https://github.com/JamesWilko/Payday-2-BLT-Lua) and [
 
   *Example:*
 
-  `>HoldTheKey:Key_Held("num 0")
-  =>true`
+  `>HoldTheKey:Key_Held("num 0")`
+  
+  `=>true`
 
 ---
 

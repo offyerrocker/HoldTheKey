@@ -74,9 +74,9 @@ Compatible with both [BLT](https://github.com/JamesWilko/Payday-2-BLT-Lua) and [
 
 **HoldTheKey:Get_BLT_Keybind(keybind_id)**
 
-  Do not use this function in per-frame checks, because it'll severely hinder performance. Use **HoldTheKey:Add_Keybind()** and **HoldTheKey:Get_Mod_Keybind()** if you want to get the name of a key by its keybind_id.
+  Do not use this function in per-frame checks, because it'll severely hinder performance. Use *HoldTheKey:Add_Keybind()* and *HoldTheKey:Get_Mod_Keybind()* if you want to get the name of a key by its keybind_id.
 
-  This is fine to use if you're a lazy dev and you want to test something without doing setup- it's functionally otherwise the same as **HoldTheKey:Get_Mod_Keybind()**, just without the required setup or optimization.
+  This is fine to use if you're a lazy dev and you want to test something without doing setup- it's functionally otherwise the same as *HoldTheKey:Get_Mod_Keybind()*, just without the required setup or optimization.
 
   *Arguments:* `keybind_id` as defined in your mod's menu.
 

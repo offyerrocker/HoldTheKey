@@ -2,10 +2,9 @@
 Dependency mod for other PAYDAY 2 Lua mods, to make held keybind detection easier.
 Compatible with both [BLT](https://github.com/JamesWilko/Payday-2-BLT-Lua) and [SuperBLT.](https://superblt.znix.xyz)
 
----
-
 # Documentation and Usage:
 
+---
 
 **HoldTheKey:Add_Keybind(keybind_id)**
 
@@ -27,6 +26,8 @@ Compatible with both [BLT](https://github.com/JamesWilko/Payday-2-BLT-Lua) and [
 
   `end)`
 
+---
+
 **HoldTheKey:Remove_Keybind(keybind_id)**
 
   Use this function to remove stored keybinds. I don't know when you'd ever need it but it's there if you do.
@@ -39,6 +40,8 @@ Compatible with both [BLT](https://github.com/JamesWilko/Payday-2-BLT-Lua) and [
 
   `HoldTheKey:Remove_Keybind("keybindid_pirateperfection_addthirtygazilliondollarstomyspendingcash")`
 
+---
+
 **HoldTheKey:Get_Mod_Keybind(keybind_id)**
 
   *Arguments:* `keybind_id` as defined in your mod's menu.
@@ -49,6 +52,8 @@ Compatible with both [BLT](https://github.com/JamesWilko/Payday-2-BLT-Lua) and [
 
   `> HoldTheKey:Get_Mod_Keybind("keybindid_taclean_left")
   => "q"`
+
+---
 
 **HoldTheKey:Keybind_Held(keybind_id)**
 
@@ -61,6 +66,8 @@ Compatible with both [BLT](https://github.com/JamesWilko/Payday-2-BLT-Lua) and [
   `>HoldTheKey:Keybind_Held("keybindid_taclean_left")
   =>true`
 
+---
+
 **HoldTheKey:Key_Held(key)**
 
   *Arguments:* Keyboard button name or mouse button name.
@@ -72,6 +79,8 @@ Compatible with both [BLT](https://github.com/JamesWilko/Payday-2-BLT-Lua) and [
   `>HoldTheKey:Key_Held("num 0")
   =>true`
 
+---
+
 **HoldTheKey:Get_BLT_Keybind(keybind_id)**
 
   Do not use this function in per-frame checks, because it'll severely hinder performance. Use *HoldTheKey:Add_Keybind()* and *HoldTheKey:Get_Mod_Keybind()* if you want to get the name of a key by its keybind_id.
@@ -81,6 +90,8 @@ Compatible with both [BLT](https://github.com/JamesWilko/Payday-2-BLT-Lua) and [
   *Arguments:* `keybind_id` as defined in your mod's menu.
 
   *Returns:* The name of the bound keyboard button or mouse button.
+
+---
 
 **HoldTheKey:Save_All_Keybinds()**
 

@@ -2,6 +2,8 @@
 Dependency mod for other PAYDAY 2 Lua mods, to make held keybind detection easier.
 Compatible with both [BLT](https://github.com/JamesWilko/Payday-2-BLT-Lua) and [SuperBLT.](https://superblt.znix.xyz)
 
+I made this because I've had technical issues with the functions provided in the Keybind Manager for BLT/SuperBLT.
+
 # Documentation and Usage:
 
 ---

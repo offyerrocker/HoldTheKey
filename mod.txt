@@ -3,7 +3,7 @@
 	"description" : "Dependency for mods to make it easier to detect when a keybind is held instead of only pressed.",
 	"author" : "Offyerrocker",
 	"contact" : "Discord: Offyerrocker#3878",
-	"version" : "1.0",
+	"version" : "1.1",
 	"blt_version" : 2,
 	"color" : "255 255 255",
 	"hooks" : [

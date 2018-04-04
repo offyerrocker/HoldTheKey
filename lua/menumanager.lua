@@ -87,7 +87,7 @@ function HTK:Get_BLT_Keybind(id)
 		end
 	end
 	
-	if _G.BLTSuperMod then
+	if BLT.Keybinds._potential_keybinds then
 		--has to iterate through two sets of tables because caches
 		for k,v in pairs(BLT.Keybinds._potential_keybinds) do
 			if type(v) == "table" then
@@ -95,11 +95,11 @@ function HTK:Get_BLT_Keybind(id)
 					if v["pc"] then --todo add support for controller binds via not-pc, dunno how superblt does it and i'm too lazy right now
 						return tostring(v["pc"])
 					else
-						return "unbound_keybind"
+						return "unbound_keybind_2"
 					end
 				end
 			else
-				log("HTK: SuperBLT Found a non-table keybind " .. tostring(v))	--yeah still shouldn't happen		
+				log("HTK: Cached: Found a non-table keybind " .. tostring(v))	--yeah still shouldn't happen		
 			end
 		end
 	end

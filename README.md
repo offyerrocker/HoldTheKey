@@ -106,7 +106,12 @@ I made this because I've had technical issues with the functions provided in the
 
 ---
 
-**HoldTheKey:Save_All_Keybinds()**
+**HoldTheKey:Refresh_Keybinds()** (*Previously "Save_All_Keybinds()"*)
+Gets a list of every keybind_id currently stored with HTK and checks it against BLT's registered keybind keys, to update saved keyboard button names or mouse button names stored with its respective keybind_id pair in HTK.
 
-  Unimplemented
+In essence, this function is used to refresh saved keybinds, in case the user has rebound any mod keybinds which require HTK. 
+
+*Arguments:* None
+
+*Returns:* Nothing :(
 

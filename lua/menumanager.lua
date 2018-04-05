@@ -45,12 +45,12 @@ end
 --pretty self explanatory. keybinds are added to this mod's save.txt (questionable decision, i'll think about if this is a good idea lol)
 function HTK:Add_Keybind(keybind_id)
 	if not (keybind_id) then
-		log("HoldTheKey:Add_Keybind(" .. tostring(keybind_id) .. ") ERROR! Invalid keybind_id")
+--		log("HoldTheKey:Add_Keybind(" .. tostring(keybind_id) .. ") ERROR! Invalid keybind_id")
 		return
 	end
 	
 	local key = HTK:Get_BLT_Keybind(keybind_id)
-	log("HoldTheKey:Add_Keybind() Saved keybind with id [" .. tostring(key) .. "]")
+--	log("HoldTheKey:Add_Keybind() Saved keybind with id [" .. tostring(key) .. "]")
 	HTK.saved_keybinds[keybind_id] = key
 
 	HTK:SaveKeybinds()
@@ -61,13 +61,15 @@ function HTK:Remove_Keybind(keybind_id) --not sure when anyone would ever use th
 		log("HoldTheKey:Remove_Keybind(" .. tostring(keybind_id) .. ") ERROR! Invalid keybind_id")
 		return
 	end
-	HTK.saved_keybinds[keybind_id] = nil	
+	HTK.saved_keybinds[keybind_id] = nil
+--	HTK:SaveKeybinds()
 end
 
-function HTK:Save_All_Keybinds()
+function HTK:Refresh_Keybinds() --refresh and save all keybinds
 	for id,key in pairs(HTK.saved_keybinds) do
-		HTK:Get_BLT_Keybind(id)
+		 HTK:Add_Keybind(id)
 	end
+	HTK:SaveKeybinds()
 end
 
 --NOT designed to be run every frame. please for the love of god, use Add_Keybind() and Get_Mod_Keybind() instead
@@ -79,7 +81,7 @@ function HTK:Get_BLT_Keybind(id)
 				if v["_key"] and v["_key"]["pc"] then --todo add support for controller binds via not-pc
 					return tostring(v["_key"]["pc"])
 				else
-					return "nil keybind"
+					return "unbound_keybind_1"
 				end
 			end
 		else
@@ -155,16 +157,17 @@ Hooks:Add( "MenuManagerInitialize", "MenuManagerInitialize_HTK", function(menu_m
 		HTK.settings.allow_double_binding = value
 		HTK:SaveSettings()
 	end
-	MenuCallbackHandler.callback_htk_button_reset = function(self) --refresh
+	MenuCallbackHandler.callback_htk_button_reset = function(self) --delete
 		HTK:ClearSavedKeybinds()
 	end
-	MenuCallbackHandler.callback_htk_button_reload = function(self) --refresh
+	MenuCallbackHandler.callback_htk_button_reload = function(self) --refresh- from htk save file, then get by blt saved keybinds, then save to htk savefile
 		HTK:LoadKeybinds()
+		HTK:Refresh_Keybinds()
 	end	
 	MenuCallbackHandler.callback_htk_close = function(this)
-		HTK:SaveSettings()
+		HTK:SaveSettings()--this is redundant for now, but whatever
 	end
-	HTK:LoadKeybinds() --todo make this NOT initialise every time the menu is started
+	HTK:LoadKeybinds() --todo make this NOT initialise every time the menu is started? nah it's prob fine
 	HTK:LoadSettings()
 	MenuHelper:LoadFromJsonFile(HTK.mod_path .. "menu/options.txt", HTK, HTK.settings)
 	

@@ -151,7 +151,7 @@ function MenuNodeGui._key_press(self, o, key, input_id, item, no_add)
 		Hooks:Call( "CustomizeControllerOnKeySet", item:parameters().connection_name, key_button )
 	end
 	
-	HoldTheKey:Save_All_Keybinds()
+	HoldTheKey:Refresh_Keybinds()--update and save new keybinds when rebinding mod controls
 	--should probably just save the specified key_button but this is fine
 	
 	managers.controller:rebind_connections()

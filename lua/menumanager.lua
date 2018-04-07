@@ -27,6 +27,9 @@ end
 --this is designed to be run every frame. more efficient than searching the entire blt keybind table every frame
 --returns bool
 function HTK:Keybind_Held(keybind_id)
+	if managers.hud._chat_focus then --yeah, leaning back and forth with Tactical Lean mod while typing was weird
+		return false
+	end
 	local key = HTK:Get_Mod_Keybind(keybind_id)
 
 	if not key then
@@ -37,7 +40,10 @@ function HTK:Keybind_Held(keybind_id)
 	return (key:find("mouse ") and Input:mouse():down(Idstring(key:sub(7))) or Input:keyboard():down(Idstring(key)))
 end
 
-function HoldTheKey:Key_Held(key)
+function HoldTheKey:Key_Held(key) --not sure if i can find a use-case for wanting to check held-keys while chat is open
+	if managers.hud._chat_focus then
+		return false
+	end
 	key = tostring(key)
 	return (key:find("mouse ") and Input:mouse():down(Idstring(key:sub(7))) or Input:keyboard():down(Idstring(key)))	
 end

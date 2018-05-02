@@ -5,6 +5,7 @@
 	"contact" : "Discord: Offyerrocker#3878",
 	"version" : "1.21",
 	"blt_version" : 2,
+	"image" : "htk_icon.png",
 	"color" : "255 255 255",
 	"hooks" : [
 		{

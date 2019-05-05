@@ -1,3 +1,4 @@
+
 CloneClass( MenuNodeGui )
 
 Hooks:RegisterHook("CustomizeControllerOnKeySet")
@@ -19,11 +20,15 @@ function MenuNodeGui._key_press(self, o, key, input_id, item, no_add)
 	end
 
 	local row_item = self:row_item(item)
+
 	if key == Idstring("esc") then
+		item:parameters().binding = nil
+		Hooks:Call( "CustomizeControllerOnKeySet", item:parameters().connection_name, "" )
+		HoldTheKey:Refresh_Keybinds()
 		self:_end_customize_controller(o, item)
 		return
 	end
-
+	
 	if input_id ~= "mouse" or not Input:mouse():button_name_str(key) then
 	end
 
@@ -60,8 +65,6 @@ function MenuNodeGui._key_press(self, o, key, input_id, item, no_add)
 	if not key_name:is_nil_or_empty() then
 		for _, btn in ipairs(forbidden_btns) do
 			if Idstring(btn) == key then
-			--todo: if key == "esc" then unbind key in controllermanager
-			
 				managers.menu:show_key_binding_forbidden({KEY = key_name})
 				self:_end_customize_controller(o, item)
 				return
@@ -114,7 +117,6 @@ function MenuNodeGui._key_press(self, o, key, input_id, item, no_add)
 	
 	local connection = nil --doesn't need to be set to nil anymore but whatever
 	if item:parameters().axis then
-		
 		connections[item:parameters().axis]._btn_connections[item:parameters().button].name = key_name
 		managers.controller:set_user_mod(item:parameters().connection_name, {
 			axis = item:parameters().axis,
@@ -125,7 +127,6 @@ function MenuNodeGui._key_press(self, o, key, input_id, item, no_add)
 		connection = connections[item:parameters().axis]
 
 	else
-
 		if connections[item:parameters().button] == nil then
 			for k, v in pairs( connections ) do
 				connections[item:parameters().button] = clone(v)
@@ -149,9 +150,12 @@ function MenuNodeGui._key_press(self, o, key, input_id, item, no_add)
 	if connection then
 		local key_button = item:parameters().binding
 		Hooks:Call( "CustomizeControllerOnKeySet", item:parameters().connection_name, key_button )
+		if item:parameters().connection_name then--HoldTheKey:Get_Mod_Keybind(item:parameters().connection_name) then
+			HoldTheKey:Add_Keybind_Hard(item:parameters().connection_name, key_button)
+		end
+		HoldTheKey:Refresh_Keybinds()--update and save new keybinds when rebinding mod controls
 	end
 	
-	HoldTheKey:Refresh_Keybinds()--update and save new keybinds when rebinding mod controls
 	--should probably just save the specified key_button but this is fine
 	
 	managers.controller:rebind_connections()

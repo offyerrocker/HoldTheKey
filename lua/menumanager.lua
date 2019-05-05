@@ -8,44 +8,68 @@ HTK.settings = {
 	allow_double_binding = true
 }
 HTK.saved_keybinds = {}
+HTK.logged_errors = {} --lazy implementation but it'll work
 
 --this is just a setting i added to the mod to allow double-binding since it's the same function, you can ignore this
 function HTK:AllowDoublebinding()
-	return HTK.settings.allow_double_binding
+	return self.settings.allow_double_binding
 end
 
 --i dunno when you'd need this since you have Key_Held() but i'm adding it anyway
 function HTK:Get_Mod_Keybind(keybind_id)
-	if not (keybind_id) then
-		log("HoldTheKey: ERROR! Invalid mod_id or keybind_id")
+	if not keybind_id then 
 		return
 	end
+	if not (self.saved_keybinds[keybind_id]) then
+		if not self.logged_errors[keybind_id] then
+			self.logged_errors[keybind_id] = true
+			log("HoldTheKey:Get_Mod_Keybind(" .. tostring(keybind_id) .. ") ERROR! Invalid keybind_id")
+		end
+		return
+	elseif self.logged_errors[keybind_id] then 
+		self.logged_errors[keybind_id] = nil
+	end
 	
-	return HTK.saved_keybinds[keybind_id]
+	
+	return self.saved_keybinds[keybind_id]
 end
 
 --this is designed to be run every frame. more efficient than searching the entire blt keybind table every frame
 --returns bool
 function HTK:Keybind_Held(keybind_id)
-	if managers.hud._chat_focus then --yeah, leaning back and forth with Tactical Lean mod while typing was weird
+	if not (managers and managers.hud) or managers.hud._chat_focus then --yeah, leaning back and forth with Tactical Lean mod while typing was weird
 		return false
 	end
-	local key = HTK:Get_Mod_Keybind(keybind_id)
+	local key = self:Get_Mod_Keybind(keybind_id)
 
 	if not key then
-		log("HoldTheKey:Keybind_Held(" .. tostring(keybind_id) .. ") ERROR! Invalid keybind_id")
+--		log("HoldTheKey:Keybind_Held(" .. tostring(keybind_id) .. ") ERROR! Invalid keybind_id")
 		return false	
 	end
 	
-	return (key:find("mouse ") and Input:mouse():down(Idstring(key:sub(7))) or Input:keyboard():down(Idstring(key)))
+	return self:Key_Held(key)
 end
 
-function HoldTheKey:Key_Held(key) --not sure if i can find a use-case for wanting to check held-keys while chat is open
-	if managers.hud._chat_focus then
+function HTK:Key_Held(key) --not sure if i can find a use-case for wanting to check held-keys while chat is open
+	if not (managers and managers.hud) or managers.hud._chat_focus then
 		return false
 	end
+	
 	key = tostring(key)
-	return (key:find("mouse ") and Input:mouse():down(Idstring(key:sub(7))) or Input:keyboard():down(Idstring(key)))	
+	if key:find("mouse ") then 
+		if not key:find("wheel") then 
+			key = key:sub(7)
+		end
+		return Input:mouse():down(Idstring(key))
+	else
+		return Input:keyboard():down(Idstring(key))
+	end
+end
+
+--sometimes BLT doesn't cooperate. this function is for directly adding keybinds by both connection name and key name.
+function HTK:Add_Keybind_Hard(keybind_id,key)
+	self.saved_keybinds[keybind_id] = key
+	log("HoldTheKey: Forced add keybind (" .. tostring(keybind_id) .. "," .. tostring(key)..")")
 end
 
 --pretty self explanatory. keybinds are added to this mod's save.txt (questionable decision, i'll think about if this is a good idea lol)
@@ -55,11 +79,11 @@ function HTK:Add_Keybind(keybind_id)
 		return
 	end
 	
-	local key = HTK:Get_BLT_Keybind(keybind_id)
+	local key = self:Get_BLT_Keybind(keybind_id)
 --	log("HoldTheKey:Add_Keybind() Saved keybind with id [" .. tostring(key) .. "]")
-	HTK.saved_keybinds[keybind_id] = key
+	self.saved_keybinds[keybind_id] = key
 
-	HTK:SaveKeybinds()
+	self:SaveKeybinds()
 end
 
 function HTK:Remove_Keybind(keybind_id) --not sure when anyone would ever use this but just in case okay
@@ -72,10 +96,12 @@ function HTK:Remove_Keybind(keybind_id) --not sure when anyone would ever use th
 end
 
 function HTK:Refresh_Keybinds() --refresh and save all keybinds
-	for id,key in pairs(HTK.saved_keybinds) do
-		 HTK:Add_Keybind(id)
+	self.logged_errors = {}
+	log("Refreshed HoldTheKey keybinds")
+	for id,key in pairs(self.saved_keybinds) do
+		 self:Add_Keybind(id)
 	end
-	HTK:SaveKeybinds()
+	self:SaveKeybinds()
 end
 
 --NOT designed to be run every frame. please for the love of god, use Add_Keybind() and Get_Mod_Keybind() instead
@@ -87,7 +113,7 @@ function HTK:Get_BLT_Keybind(id)
 				if v["_key"] and v["_key"]["pc"] then --todo add support for controller binds via not-pc
 					return tostring(v["_key"]["pc"])
 				else
-					return "unbound_keybind_1"
+					return --"unbound_keybind_1"
 				end
 			end
 		else
@@ -103,7 +129,7 @@ function HTK:Get_BLT_Keybind(id)
 					if v["pc"] then --todo add support for controller binds via not-pc, dunno how superblt does it and i'm too lazy right now
 						return tostring(v["pc"])
 					else
-						return "unbound_keybind_2"
+						return --"unbound_keybind_2"
 					end
 				end
 			else
@@ -114,8 +140,8 @@ function HTK:Get_BLT_Keybind(id)
 end
 
 function HTK:ClearSavedKeybinds()
-	HTK.saved_keybinds = {}
-	HTK:SaveKeybinds()
+	self.saved_keybinds = {}
+	self:SaveKeybinds()
 end
 
 function HTK:LoadKeybinds()
@@ -125,7 +151,7 @@ function HTK:LoadKeybinds()
 			self.saved_keybinds[k] = v
 		end
 	else
-		HTK:SaveKeybinds()
+		self:SaveKeybinds()
 	end
 end
 function HTK:SaveKeybinds()
@@ -142,7 +168,7 @@ function HTK:LoadSettings()
 			self.settings[k] = v
 		end
 	else
-		HTK:SaveSettings()
+		self:SaveSettings()
 	end
 end
 function HTK:SaveSettings()

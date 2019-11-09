@@ -9,19 +9,26 @@ HTK.settings = {
 }
 HTK.saved_keybinds = {}
 HTK.logged_errors = {} --lazy implementation but it'll work
+HTK._input_cache = {} --used to store and track pressed/released states
 
 --this is just a setting i added to the mod to allow double-binding since it's the same function, you can ignore this
 function HTK:AllowDoublebinding()
 	return self.settings.allow_double_binding
 end
 
---i dunno when you'd need this since you have Key_Held() but i'm adding it anyway
 function HTK:Get_Mod_Keybind(keybind_id)
 	if not keybind_id then 
 		return
 	end
 	if not (self.saved_keybinds[keybind_id]) then
 		if not self.logged_errors[keybind_id] then
+			
+			local key = self:Get_BLT_Keybind(keybind_id)
+			if key then
+				self.saved_keybinds[keybind_id] = key
+				return key
+			end
+		
 			self.logged_errors[keybind_id] = true
 			log("HoldTheKey:Get_Mod_Keybind(" .. tostring(keybind_id) .. ") ERROR! Invalid keybind_id")
 		end
@@ -38,7 +45,7 @@ end
 --returns bool
 function HTK:Keybind_Held(keybind_id)
 	if not (managers and managers.hud) or managers.hud._chat_focus then --yeah, leaning back and forth with Tactical Lean mod while typing was weird
-		return false
+		return
 	end
 	local key = self:Get_Mod_Keybind(keybind_id)
 
@@ -50,19 +57,69 @@ function HTK:Keybind_Held(keybind_id)
 	return self:Key_Held(key)
 end
 
-function HTK:Key_Held(key) --not sure if i can find a use-case for wanting to check held-keys while chat is open
+function HTK:Key_Held(key) --most HtK functions call this one at some point
 	if not (managers and managers.hud) or managers.hud._chat_focus then
-		return false
+		--couldn't find any use-case for wanting to check held-keys while chat is open
+		return --"nil" indicates that the chat is open or managers.hud is not loaded, as opposed to "false" which means that the key isn't pressed
 	end
 	
 	key = tostring(key)
+	local result
 	if key:find("mouse ") then 
 		if not key:find("wheel") then 
 			key = key:sub(7)
 		end
-		return Input:mouse():down(Idstring(key))
+		result = Input:mouse():down(Idstring(key))
 	else
-		return Input:keyboard():down(Idstring(key))
+		result = Input:keyboard():down(Idstring(key))
+	end
+	self._input_cache[key] = result --save last state to cache
+	return result	
+end
+
+--[[ 
+I wrote these before realising that it's actually pointless to save a cache when it's only refreshed on call anyway
+Released() is inherently nonfunctional If multiple calls to either permutation of Released() are made in one frame, only the first one will register a "released" result
+
+Pressed() will work, but if you want to track released then you should write your own cache such that it does not interfere with (and is not interfered with by) other mods
+You can use these functions as a base for that if you need
+
+
+function HTK:Key_Released(key)
+	if key and self._input_cache[key] then
+		return self:Key_Held(key) == false --check specifically for false
+	else
+		return false
+	end
+end
+
+function HTK:Keybind_Released(keybind_id)
+	local key = self:Get_Mod_Keybind(keybind_id)
+
+	if key and self._input_cache[key] then
+		return self:Key_Held(key) == false
+	else
+		return false
+	end
+--	return 
+end
+--]]
+
+function HTK:Key_Pressed(key)
+	if key and not self._input_cache[key] then
+		return self:Key_Held(key)
+	else
+		return false
+	end
+end
+
+function HTK:Keybind_Pressed(keybind_id)
+	local key = self:Get_Mod_Keybind(keybind_id)
+	
+	if key and not self._input_cache[key] then
+		return self:Key_Held(key)
+	else
+		return false
 	end
 end
 
@@ -72,7 +129,7 @@ function HTK:Add_Keybind_Hard(keybind_id,key)
 	log("HoldTheKey: Forced add keybind (" .. tostring(keybind_id) .. "," .. tostring(key)..")")
 end
 
---pretty self explanatory. keybinds are added to this mod's save.txt (questionable decision, i'll think about if this is a good idea lol)
+--pretty self explanatory. keybinds are added to this mod's save.txt
 function HTK:Add_Keybind(keybind_id)
 	if not (keybind_id) then
 --		log("HoldTheKey:Add_Keybind(" .. tostring(keybind_id) .. ") ERROR! Invalid keybind_id")
@@ -153,6 +210,7 @@ function HTK:LoadKeybinds()
 	else
 		self:SaveKeybinds()
 	end
+--Console:logall(json.decode(io.open(HoldTheKey.mods_savepath, "r"):read("*all")))
 end
 function HTK:SaveKeybinds()
 	local file = io.open(self.mods_savepath,"w+")
@@ -178,6 +236,13 @@ function HTK:SaveSettings()
 		file:close()
 	end
 end
+
+Hooks:Add("CustomizeControllerOnKeySet","CallMenuBoundKey_HTK",function(connection_name,key_button)
+	if connection_name then--HoldTheKey:Get_Mod_Keybind(item:parameters().connection_name) then
+		HoldTheKey:Add_Keybind_Hard(connection_name, key_button)
+	end
+	HoldTheKey:Refresh_Keybinds()--update and save new keybinds when rebinding mod controls
+end)
 
 Hooks:Add("LocalizationManagerPostInit", "LocalizationManagerPostInit_HTK", function( loc )
 	loc:load_localization_file( HTK.mod_path .. "loc/en.txt")

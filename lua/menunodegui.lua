@@ -1,4 +1,3 @@
-
 CloneClass( MenuNodeGui )
 
 Hooks:RegisterHook("CustomizeControllerOnKeySet")
@@ -115,7 +114,7 @@ function MenuNodeGui._key_press(self, o, key, input_id, item, no_add)
 	--offy wuz naut hear v
 	
 	
-	local connection = nil --doesn't need to be set to nil anymore but whatever
+	local connection = nil
 	if item:parameters().axis then
 		connections[item:parameters().axis]._btn_connections[item:parameters().button].name = key_name
 		managers.controller:set_user_mod(item:parameters().connection_name, {
@@ -150,10 +149,7 @@ function MenuNodeGui._key_press(self, o, key, input_id, item, no_add)
 	if connection then
 		local key_button = item:parameters().binding
 		Hooks:Call( "CustomizeControllerOnKeySet", item:parameters().connection_name, key_button )
-		if item:parameters().connection_name then--HoldTheKey:Get_Mod_Keybind(item:parameters().connection_name) then
-			HoldTheKey:Add_Keybind_Hard(item:parameters().connection_name, key_button)
-		end
-		HoldTheKey:Refresh_Keybinds()--update and save new keybinds when rebinding mod controls
+
 	end
 	
 	--should probably just save the specified key_button but this is fine

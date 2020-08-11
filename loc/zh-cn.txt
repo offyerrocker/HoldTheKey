@@ -1,0 +1,9 @@
+{
+	"htk_title" : "Hold The Key 模组选项",
+	"htk_toggle_allow_doublebinding_title" : "允许按键多重绑定",
+	"htk_toggle_allow_doublebinding_desc" : "让一个按键能绑定多重游戏操作，且不影响按键检查。",
+	"htk_button_reload_title" : "重新加载按键绑定",
+	"htk_button_reload_desc" : "从已保存的数据中重新加载所有的按键绑定。",
+	"htk_button_reset_title" : "清除所有按键绑定",
+	"htk_button_reset_desc" : "删除此模组中所有的按键绑定。但不影响现有的 BLT 绑定。"
+}

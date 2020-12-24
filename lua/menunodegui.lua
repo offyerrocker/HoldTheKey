@@ -1,6 +1,3 @@
-CloneClass( MenuNodeGui )
-
-Hooks:RegisterHook("CustomizeControllerOnKeySet")
 function MenuNodeGui._key_press(self, o, key, input_id, item, no_add)
 
 	if managers.system_menu:is_active() then

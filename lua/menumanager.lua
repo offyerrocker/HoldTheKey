@@ -244,9 +244,11 @@ Hooks:Add("CustomizeControllerOnKeySet","CallMenuBoundKey_HTK",function(connecti
 	HoldTheKey:Refresh_Keybinds()--update and save new keybinds when rebinding mod controls
 end)
 
-Hooks:Add("LocalizationManagerPostInit", "LocalizationManagerPostInit_HTK", function( loc )
-	loc:load_localization_file( HTK.mod_path .. "loc/en.txt")
-end)
+if not BeardLib then 
+	Hooks:Add("LocalizationManagerPostInit", "LocalizationManagerPostInit_HTK", function( loc )
+		loc:load_localization_file( HTK.mod_path .. "loc/en.txt")
+	end)
+end
 
 Hooks:Add( "MenuManagerInitialize", "MenuManagerInitialize_HTK", function(menu_manager)
 	MenuCallbackHandler.callback_htk_toggle_doublebinding = function(self,item) --turn on doublebinding

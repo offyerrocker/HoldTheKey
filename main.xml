@@ -1,7 +1,7 @@
 <mod name="Hold The Key" author="Offyerrocker" color="Color(1,1,1)" >
-	<AssetUpdates id="22253" version="1.4" provider="modworkshop" install_directory="mods/" version_is_number="true" />
-	<Localization directory="localization" default="english.txt">
-		<loc file="english.txt" language="english" />
+	<AssetUpdates id="22253" version="1.42" provider="modworkshop" install_directory="mods/" version_is_number="true" />
+	<Localization directory="loc" default="en.txt">
+		<loc file="en.txt" language="english" />
 		<loc file="zh-cn.txt" language="chinese" /> <!-- chinese simplified -->
 	</Localization>
 </mod>

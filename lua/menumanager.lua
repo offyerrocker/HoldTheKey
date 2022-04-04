@@ -1,22 +1,21 @@
 _G.HoldTheKey = _G.HoldTheKey or {}
-local HTK = _G.HoldTheKey
-HTK.mod_path = ModPath
-HTK.settings_savepath = SavePath .. "holdthekey_settings.txt"
-HTK.mods_savepath = SavePath .. "holdthekey.txt"
+HoldTheKey.mod_path = ModPath
+HoldTheKey.settings_savepath = SavePath .. "holdthekey_settings.txt"
+HoldTheKey.mods_savepath = SavePath .. "holdthekey.txt"
 
-HTK.settings = {
+HoldTheKey.settings = {
 	allow_double_binding = true
 }
-HTK.saved_keybinds = {}
-HTK.logged_errors = {} --lazy implementation but it'll work
-HTK._input_cache = {} --used to store and track pressed/released states
+HoldTheKey.saved_keybinds = {}
+HoldTheKey.logged_errors = {} --lazy implementation but it'll work
+HoldTheKey._input_cache = {} --used to store and track pressed/released states
 
 --this is just a setting i added to the mod to allow double-binding since it's the same function, you can ignore this
-function HTK:AllowDoublebinding()
+function HoldTheKey:AllowDoublebinding()
 	return self.settings.allow_double_binding
 end
 
-function HTK:Get_Mod_Keybind(keybind_id)
+function HoldTheKey:Get_Mod_Keybind(keybind_id)
 	if not keybind_id then 
 		return
 	end
@@ -43,9 +42,11 @@ end
 
 --this is designed to be run every frame. more efficient than searching the entire blt keybind table every frame
 --returns bool
-function HTK:Keybind_Held(keybind_id)
-	if not (managers and managers.hud) or managers.hud._chat_focus then --yeah, leaning back and forth with Tactical Lean mod while typing was weird
-		return
+function HoldTheKey:Keybind_Held(keybind_id,ignore_chat_focus)
+	if not ignore_chat_focus then 
+		if not (managers and managers.hud) or managers.hud._chat_focus then --yeah, leaning back and forth with Tactical Lean mod while typing was weird
+			return
+		end
 	end
 	local key = self:Get_Mod_Keybind(keybind_id)
 
@@ -57,8 +58,8 @@ function HTK:Keybind_Held(keybind_id)
 	return self:Key_Held(key)
 end
 
-function HTK:Key_Held(key) --most HtK functions call this one at some point
-	if not (managers and managers.hud) or managers.hud._chat_focus then
+function HoldTheKey:Key_Held(key,ignore_chat_focus) --most HtK functions call this one at some point
+	if not ignore_chat_focus and not (managers and managers.hud) or managers.hud._chat_focus then
 		--couldn't find any use-case for wanting to check held-keys while chat is open
 		return --"nil" indicates that the chat is open or managers.hud is not loaded, as opposed to "false" which means that the key isn't pressed
 	end
@@ -85,7 +86,7 @@ Pressed() will work, but if you want to track released then you should write you
 You can use these functions as a base for that if you need
 
 
-function HTK:Key_Released(key)
+function HoldTheKey:Key_Released(key)
 	if key and self._input_cache[key] then
 		return self:Key_Held(key) == false --check specifically for false
 	else
@@ -93,7 +94,7 @@ function HTK:Key_Released(key)
 	end
 end
 
-function HTK:Keybind_Released(keybind_id)
+function HoldTheKey:Keybind_Released(keybind_id)
 	local key = self:Get_Mod_Keybind(keybind_id)
 
 	if key and self._input_cache[key] then
@@ -105,7 +106,7 @@ function HTK:Keybind_Released(keybind_id)
 end
 --]]
 
-function HTK:Key_Pressed(key)
+function HoldTheKey:Key_Pressed(key)
 	if key and not self._input_cache[key] then
 		return self:Key_Held(key)
 	else
@@ -113,7 +114,7 @@ function HTK:Key_Pressed(key)
 	end
 end
 
-function HTK:Keybind_Pressed(keybind_id)
+function HoldTheKey:Keybind_Pressed(keybind_id)
 	local key = self:Get_Mod_Keybind(keybind_id)
 	
 	if key and not self._input_cache[key] then
@@ -124,13 +125,13 @@ function HTK:Keybind_Pressed(keybind_id)
 end
 
 --sometimes BLT doesn't cooperate. this function is for directly adding keybinds by both connection name and key name.
-function HTK:Add_Keybind_Hard(keybind_id,key)
+function HoldTheKey:Add_Keybind_Hard(keybind_id,key)
 	self.saved_keybinds[keybind_id] = key
 	log("HoldTheKey: Forced add keybind (" .. tostring(keybind_id) .. "," .. tostring(key)..")")
 end
 
 --pretty self explanatory. keybinds are added to this mod's save.txt
-function HTK:Add_Keybind(keybind_id)
+function HoldTheKey:Add_Keybind(keybind_id)
 	if not (keybind_id) then
 --		log("HoldTheKey:Add_Keybind(" .. tostring(keybind_id) .. ") ERROR! Invalid keybind_id")
 		return
@@ -143,16 +144,16 @@ function HTK:Add_Keybind(keybind_id)
 	self:SaveKeybinds()
 end
 
-function HTK:Remove_Keybind(keybind_id) --not sure when anyone would ever use this but just in case okay
+function HoldTheKey:Remove_Keybind(keybind_id) --not sure when anyone would ever use this but just in case okay
 	if not (keybind_id) then
 		log("HoldTheKey:Remove_Keybind(" .. tostring(keybind_id) .. ") ERROR! Invalid keybind_id")
 		return
 	end
-	HTK.saved_keybinds[keybind_id] = nil
---	HTK:SaveKeybinds()
+	HoldTheKey.saved_keybinds[keybind_id] = nil
+--	HoldTheKey:SaveKeybinds()
 end
 
-function HTK:Refresh_Keybinds() --refresh and save all keybinds
+function HoldTheKey:Refresh_Keybinds() --refresh and save all keybinds
 	self.logged_errors = {}
 	log("Refreshed HoldTheKey keybinds")
 	for id,key in pairs(self.saved_keybinds) do
@@ -163,7 +164,7 @@ end
 
 --NOT designed to be run every frame. please for the love of god, use Add_Keybind() and Get_Mod_Keybind() instead
 --should only be run on rebind event or in cases where performance doesn't matter as much, like menus or whatever
-function HTK:Get_BLT_Keybind(id)
+function HoldTheKey:Get_BLT_Keybind(id)
 	for k,v in pairs(BLT.Keybinds._keybinds) do
 		if type(v) == "table" then
 			if v["_id"] == id then
@@ -174,7 +175,7 @@ function HTK:Get_BLT_Keybind(id)
 				end
 			end
 		else
-			log("HTK: Found a non-table keybind " .. tostring(v))	--this should never happen		
+			log("HoldTheKey: Found a non-table keybind " .. tostring(v))	--this should never happen		
 		end
 	end
 	
@@ -190,18 +191,18 @@ function HTK:Get_BLT_Keybind(id)
 					end
 				end
 			else
-				log("HTK: Cached: Found a non-table keybind " .. tostring(v))	--yeah still shouldn't happen		
+				log("HoldTheKey: Cached: Found a non-table keybind " .. tostring(v))	--yeah still shouldn't happen		
 			end
 		end
 	end
 end
 
-function HTK:ClearSavedKeybinds()
+function HoldTheKey:ClearSavedKeybinds()
 	self.saved_keybinds = {}
 	self:SaveKeybinds()
 end
 
-function HTK:LoadKeybinds()
+function HoldTheKey:LoadKeybinds()
 	local file = io.open(self.mods_savepath, "r")
 	if (file) then
 		for k, v in pairs(json.decode(file:read("*all"))) do
@@ -212,14 +213,14 @@ function HTK:LoadKeybinds()
 	end
 --Console:logall(json.decode(io.open(HoldTheKey.mods_savepath, "r"):read("*all")))
 end
-function HTK:SaveKeybinds()
+function HoldTheKey:SaveKeybinds()
 	local file = io.open(self.mods_savepath,"w+")
 	if file then
 		file:write(json.encode(self.saved_keybinds))
 		file:close()
 	end
 end
-function HTK:LoadSettings()
+function HoldTheKey:LoadSettings()
 	local file = io.open(self.settings_savepath, "r")
 	if (file) then
 		for k, v in pairs(json.decode(file:read("*all"))) do
@@ -229,7 +230,7 @@ function HTK:LoadSettings()
 		self:SaveSettings()
 	end
 end
-function HTK:SaveSettings()
+function HoldTheKey:SaveSettings()
 	local file = io.open(self.settings_savepath,"w+")
 	if file then
 		file:write(json.encode(self.settings))
@@ -246,29 +247,29 @@ end)
 
 if not BeardLib then 
 	Hooks:Add("LocalizationManagerPostInit", "LocalizationManagerPostInit_HTK", function( loc )
-		loc:load_localization_file( HTK.mod_path .. "loc/en.txt")
+		loc:load_localization_file( HoldTheKey.mod_path .. "loc/en.txt")
 	end)
 end
 
 Hooks:Add( "MenuManagerInitialize", "MenuManagerInitialize_HTK", function(menu_manager)
 	MenuCallbackHandler.callback_htk_toggle_doublebinding = function(self,item) --turn on doublebinding
 		local value = item:value() == 'on'
-		HTK.settings.allow_double_binding = value
-		HTK:SaveSettings()
+		HoldTheKey.settings.allow_double_binding = value
+		HoldTheKey:SaveSettings()
 	end
 	MenuCallbackHandler.callback_htk_button_reset = function(self) --delete
-		HTK:ClearSavedKeybinds()
+		HoldTheKey:ClearSavedKeybinds()
 	end
 	MenuCallbackHandler.callback_htk_button_reload = function(self) --refresh- from htk save file, then get by blt saved keybinds, then save to htk savefile
-		HTK:LoadKeybinds()
-		HTK:Refresh_Keybinds()
+		HoldTheKey:LoadKeybinds()
+		HoldTheKey:Refresh_Keybinds()
 	end	
 	MenuCallbackHandler.callback_htk_close = function(this)
-		HTK:SaveSettings()--this is redundant for now, but whatever
+		HoldTheKey:SaveSettings()--this is redundant for now, but whatever
 	end
-	HTK:LoadKeybinds() --todo make this NOT initialise every time the menu is started? nah it's prob fine
-	HTK:LoadSettings()
-	MenuHelper:LoadFromJsonFile(HTK.mod_path .. "menu/options.txt", HTK, HTK.settings)
+	HoldTheKey:LoadKeybinds() --todo make this NOT initialise every time the menu is started? nah it's prob fine
+	HoldTheKey:LoadSettings()
+	MenuHelper:LoadFromJsonFile(HoldTheKey.mod_path .. "menu/options.txt", HoldTheKey, HoldTheKey.settings)
 	
 end)
 	

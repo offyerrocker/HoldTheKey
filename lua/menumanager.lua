@@ -66,9 +66,9 @@ function HoldTheKey:Key_Held(key,ignore_chat_focus) --most HtK functions call th
 	
 	key = tostring(key)
 	local result
-	if key:find("mouse ") then 
-		if not key:find("wheel") then 
-			key = key:sub(7)
+	if string.find(key,"mouse ") then 
+		if not string.find(key,"wheel") then 
+			key = string.sub(key,7)
 		end
 		result = Input:mouse():down(Idstring(key))
 	else
